@@ -21,6 +21,13 @@ import docopt
 import os
 import six
 import sys
+import site
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+
 
 from ptpython.repl import embed, enable_deprecation_warnings, run_config
 
@@ -48,6 +55,16 @@ def run():
     # Add the current directory to `sys.path`.
     if sys.path[0] != '':
         sys.path.insert(0, '')
+
+    if "VIRTUAL_ENV" in os.environ:
+        virtual_env = Path(
+            os.environ.get("VIRTUAL_ENV"),
+            "lib",
+            "python{0}.{1}".format(*sys.version_info[0:2]),
+            "site-packages",
+        )
+        if virtual_env.exists():
+            site.addsitedir(str(virtual_env))
 
     # When a file has been given, run that, otherwise start the shell.
     if a['<arg>'] and not a['--interactive']:
